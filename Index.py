@@ -41,7 +41,13 @@ pip install -r requirements.txt
 streamlit run app.py
 ```
 ## workshop 
-1. [tanslate](/translate)
+1. [Tanslate Text](/translate)
 2. [marketing note](/mkt_content)
-3. [agent](/agent)
+3. [Document Translate](/agent)
             """)
+
+
+### word and ppt translate 
+##########################################
+#########to do 写一个目录即可###############
+##########################################
