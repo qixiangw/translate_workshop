@@ -9,7 +9,6 @@ import time
 from botocore.exceptions import NoCredentialsError
 
 
-
 # env
 # S3_BUCKET = 'YOUR_S3_BUCKET_NAME'
 
@@ -58,47 +57,56 @@ def main():
     initial_sidebar_state="expanded",
     )
 
-    st.title("离线视频翻译系统")
+    st.title("视频字幕翻译")
     #st.title("Subtitle Translation with Amazon Bedrock and Severless service")
     st.write("Amazon Bedrock 提供多种成熟的大语言模型，LLM为翻译带来更大想象空间以及更高性价比。")
     
     S3_BUCKET = st.text_input("输入S3桶名", "your-bucket-name")
 
     # 文件上传
-    uploaded_file = st.file_uploader("选择带字幕的视频文件，或者字幕文件", type=['mp4', 'avi', 'mov'])
+    uploaded_file = st.file_uploader("选择带字幕的视频文件，或者字幕文件", type=['srt'])
     if uploaded_file is not None:
         if st.button('上传到S3'):
             with st.spinner('正在上传...'):
-                if upload_to_s3(uploaded_file, S3_BUCKET, uploaded_file.name):
-                    st.success("文件成功上传到S3!")
+                folder = "input/"
+                s3_object_key = folder + uploaded_file.name
+                if upload_to_s3(uploaded_file, S3_BUCKET, s3_object_key):
+                    st.success(f"文件成功上传到{S3_BUCKET}的{folder}文件夹!")
                 else:
                     st.error("上传失败")
+        input_file_name = uploaded_file.name
+        new_key_name = input_file_name.replace('.srt', '_translated.srt')
+        folder_path = 'output/'
+        new_key = folder_path + new_key_name
 
-    # 语言选择
-    st.subheader("选择目标语言")
-    selected_languages = st.multiselect(
-        "选择要翻译的目标语言",
-        options=list(languages.keys()),
-        format_func=lambda x: f"{x} - {languages[x]}"
-    )
-
-    # 进度查询
-    st.subheader("翻译进度查询")
-    video_name = st.text_input("输入视频文件名")
-    if st.button('查询进度'):
-        if check_subtitles(S3_BUCKET, video_name):
+        if check_subtitles(S3_BUCKET, new_key):
             st.success("多语言字幕已生成!")
-            
+        
             # 下载按钮
             if st.download_button(
-                label="下载多语言字幕",
-                data=s3.get_object(Bucket=S3_BUCKET, Key=f"{os.path.splitext(video_name)[0]}_subtitles.zip")['Body'].read(),
-                file_name=f"{os.path.splitext(video_name)[0]}_subtitles.zip",
-                mime="application/zip"
+                label="下载",
+                data=s3.get_object(Bucket=S3_BUCKET, Key=new_key)['Body'].read(),
+                file_name= new_key_name
             ):
                 st.success("字幕文件下载成功!")
-        else:
-            st.info("多语言字幕尚未生成,请稍后再试")
+
+    # 语言选择
+
+    #st.markdown("#### 选择目标语言")
+    #selected_languages = st.multiselect(
+        #"选择要翻译的目标语言",
+        #options=list(languages.keys()),
+        #format_func=lambda x: f"{x} - {languages[x]}"
+    #)
+
+
+    # 进度查询
+    # st.markdown("#### 翻译进度查询")
+    # video_name = st.text_input("输入视频文件名")
+    
+    
+
+
 
 if __name__ == "__main__":
     main()

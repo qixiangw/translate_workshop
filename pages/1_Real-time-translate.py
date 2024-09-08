@@ -114,7 +114,7 @@ def translate_with_claude(model_id, target_lang, user_input):
         print("A client error occurred: " + format(message))
 
 def translatewithtranslate(target_lang, user_input):
-    translate = boto3.client('translate')
+    translate = boto3.client('translate',region_name="us-west-2")
     s_code = "auto"
     t_code = get_language_code(target_lang)
     response = translate.translate_text(
@@ -131,15 +131,16 @@ def get_language_code(language):
     except LookupError:
         return 'zh'
 
-def evalation_claude(target_lang, result_text):   
+def evalation_claude(target_lang, user_input,result_text):   
     logging.basicConfig(level=logging.ERROR)
     logger = logging.getLogger(__name__)
     try:
         bedrock = boto3.client("bedrock-runtime", region_name="us-west-2")
         model_id = 'anthropic.claude-3-5-sonnet-20240620-v1:0'
 
-        prompt = f"""假设你是一个{target_lang}语言专家，评估<text>中的三种表达方式。始终用中文回答。
-        <text>
+        prompt = f"""你是一个语言专家精通多国语言的表达和语法，评估<text>中三种翻译结果，主要考虑原文意思，以及{target_lang}表达的习惯，准确性和流畅性。始终用中文回答。
+        原文是<source>{user_input}</source>
+        翻译结果是<text>
         {result_text}
         </text>
         """
@@ -243,7 +244,7 @@ def app():
         
         button_2 = st.button("对比翻译结果", key="translate_compar_button")
         if button_2:
-            res = evalation_claude(target_lang, st.session_state.result_text)
+            res = evalation_claude(target_lang,user_input,st.session_state.result_text)
             st.write(res)
 
 

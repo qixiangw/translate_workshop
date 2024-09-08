@@ -8,46 +8,13 @@ st.set_page_config(
 )
 
 st.markdown("""
-## introduction
-info here
-## getting started
+# Quick Hands on Workshop for Translate with Bedrock
+""")
+st.image("bot.jpeg")
 
-1. To install the workshop, follow these steps:
-```bash
-# install miniconda
-    ## mac
-    brew install miniconda
-    ## other systems
-    [miniconda installer](https://docs.conda.io/en/latest/miniconda.html)
-# Create a new conda environment with Python 3.10
-conda create -n py310 python=3.10
-
-# Activate the conda environment
-conda activate py310
-
-# Clone the repository to your local machine
-git clone  ...
-
-# Navigate to the project directory
-cd smart-marketing-llm-workshop
-
-# Install dependencies from requirements.txt
-pip install -r requirements.txt
-```
-
-2. After installing, you can launch the application simply by running:
-
-```bash
-streamlit run app.py
-```
-## workshop 
-1. [Tanslate Text](/translate)
-2. [marketing note](/mkt_content)
-3. [Document Translate](/agent)
+st.markdown("""
+## Detail pages 
+#### 1.Real time translate
+#### 2.MKT content translate
+#### 3.Serveless translator
             """)
-
-
-### word and ppt translate 
-##########################################
-#########to do 写一个目录即可###############
-##########################################

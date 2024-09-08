@@ -1,2 +1,7 @@
-boto3==1.35.0
 streamlit==1.37.1
+boto3==1.35.0
+requests
+beautifulsoup4
+pandas
+langcodes
+python-docx
