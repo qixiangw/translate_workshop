@@ -45,7 +45,7 @@ def upload_to_s3(file, bucket, s3_file):
         return False
 
 def check_subtitles(bucket, video_name):
-    prefix = f"{os.path.splitext(video_name)[0]}_"
+    prefix = "output/" + video_name
     response = s3.list_objects_v2(Bucket=bucket, Prefix=prefix)
     return 'Contents' in response
 
@@ -60,7 +60,7 @@ def main():
     st.title("视频字幕翻译")
     #st.title("Subtitle Translation with Amazon Bedrock and Severless service")
     st.write("Amazon Bedrock 提供多种成熟的大语言模型，LLM为翻译带来更大想象空间以及更高性价比。")
-    
+
     S3_BUCKET = st.text_input("输入S3桶名", "your-bucket-name")
 
     # 文件上传
@@ -81,7 +81,7 @@ def main():
 
         if check_subtitles(S3_BUCKET, new_key):
             st.success("多语言字幕已生成!")
-        
+
             # 下载按钮
             if st.download_button(
                 label="下载",
@@ -103,8 +103,25 @@ def main():
     # 进度查询
     # st.markdown("#### 翻译进度查询")
     # video_name = st.text_input("输入视频文件名")
-    
-    
+
+    # 进度查询
+    st.subheader("翻译进度查询")
+    video_name = st.text_input("输入视频文件名")
+    if st.button('查询进度'):
+        if check_subtitles(S3_BUCKET, video_name):
+            st.success("多语言字幕已生成!")
+
+            # 下载按钮
+            if st.download_button(
+                label="下载多语言字幕",
+                data=s3.get_object(Bucket=S3_BUCKET, Key="output/"+video_name)['Body'].read(),
+                file_name=video_name,
+                mime="text/plain"
+            ):
+                st.success("字幕文件下载成功!")
+        else:
+            st.info("多语言字幕尚未生成,请稍后再试")
+
 
 
 
