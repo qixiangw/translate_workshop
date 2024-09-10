@@ -106,7 +106,7 @@ def main():
 
     # 进度查询
     st.subheader("翻译进度查询")
-    video_name = st.text_input("输入视频文件名")
+    video_name = st.text_input("输入视频文件名").split('.')[0]+"_translated"+".srt"
     if st.button('查询进度'):
         if check_subtitles(S3_BUCKET, video_name):
             st.success("多语言字幕已生成!")
