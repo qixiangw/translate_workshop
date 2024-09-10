@@ -152,7 +152,7 @@ def find_keywords(listings):
     return keywords
 
 
-def translate_text(user_input,target_lang,tone,brand,model_id= "anthropic.claude-3-5-sonnet-20240620-v1:0"):   
+def translate_text(user_input,target_lang,tone,brand,keywords,model_id= "anthropic.claude-3-5-sonnet-20240620-v1:0"):   
     logging.basicConfig(level=logging.ERROR)
     logger = logging.getLogger(__name__)
     try:
@@ -160,10 +160,13 @@ def translate_text(user_input,target_lang,tone,brand,model_id= "anthropic.claude
 
         system_prompt = """You are an experienced e-commerce listing writer for amazon.com."""
 
-        prompt = f"""任务是把<text>中的文本翻译并润色为{target_lang}表达。首先理解<text>中的原文，再结合SEO热门关键词<keywords>，语气风格是{tone}，然后翻译扩写<text>中的文本内容，品牌名是{brand},最后整理为amazon listing 格式，一个标题，五条bullet point，参考<output>输出Json格式。只用返回翻译结果不用其他注释。
+        prompt = f"""任务是把<text>中的文本翻译并润色为{target_lang}表达。首先理解<text>中的原文，再结合SEO热门关键词<keywords>，语气风格是{tone}，然后翻译扩写<text>中的文本内容，品牌名是{brand},最后整理为amazon listing 格式,一个标题,多条bullet point，参考<output>输出Json格式,将bullet point放置到<Aboutthisitem>内。只用返回翻译结果不用其他注释。
         <text>
         {user_input}
         </text>
+        <keywords>
+        {keywords}
+        </keywords>
         <output>
             <title>
             Runstar Smart Scale for Body Weight and Fat Percentage, High Accuracy Digital Bathroom Scale FSA or HSA Eligible with LCD Display for BMI 13 Body Composition Analyzer Sync with Fitness App
@@ -233,7 +236,7 @@ def main():
             # keywords = find_keywords(listings)
             st.write("对应站点的最新的热门关键词:（* 本搜索词排名数据来源于亚马逊后台品牌分析功能（ABA）截止0830）")
             for kw in keywords:
-                    st.write(kw)
+                st.write(kw)
         else:
             st.write("未找到任何产品，请检查站点和品类。")
 
@@ -244,10 +247,12 @@ def main():
     tone = st.selectbox("文本风格", ['正式', '促销'])
 
     if st.button("生成Listing"):
+        scraper = AmazonScraper(region, category)
+        keywords = scraper.get_top_kw()
         if product_description and brand_name:
             target_language = 'en' if region == 'US' else 'de' if region == 'DE' else 'ja'
 
-            translated_description = translate_text(product_description,target_language,tone,brand_name,model_id= "anthropic.claude-3-5-sonnet-20240620-v1:0")
+            translated_description = translate_text(product_description,target_language,tone,brand_name,keywords,model_id= "anthropic.claude-3-5-sonnet-20240620-v1:0")
             
             # title = " ".join(product_description.split()[:7])
             # bullet_points = [f"- {point}" for point in product_description.split(". ")]
@@ -259,6 +264,11 @@ def main():
                 data = json.loads(translated_description)
 
                 # st.write("## ")
+
+                st.write("### 关键词:")
+                for kw in keywords:
+                    st.write(kw)
+
 
                 # 显示标题
                 st.write("### Title:")
