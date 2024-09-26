@@ -63,17 +63,38 @@ def main():
 
     S3_BUCKET = st.text_input("输入S3桶名", "your-bucket-name")
 
+    st.write("## 视频带字幕文件")
+    #st.title("Subtitle Translation with Amazon Bedrock and Severless service")
+    st.write("同时上传视频和字幕文件，视频和字幕需要同名，比如视频名称为sucai.mp4,字幕文件为sucai.srt")
+    uploaded_mp4_with_srt= st.file_uploader("视频文件", type=['mp4', 'avi', 'mov', 'wmv', 'flv', 'mkv', 'webm', 'mpeg'])
+    uploaded_srt= st.file_uploader("字幕文件，应与视频文件同名", type=['srt'])
+
+    if uploaded_mp4_with_srt is not  None and uploaded_srt is not None:
+        if st.button("上传视频和字幕到s3"):
+            with st.spinner('正在上传...'):
+                movies_with_srt_folder = "movies_with_srt/"
+                movies_with_srt_folder_object_key = movies_with_srt_folder + uploaded_mp4_with_srt.name
+                srt_folder = "input/"
+                srt_folder_object_key = srt_folder + uploaded_srt.name
+                if upload_to_s3(uploaded_mp4_with_srt,S3_BUCKET,movies_with_srt_folder_object_key) and upload_to_s3(uploaded_srt,S3_BUCKET,srt_folder_object_key):
+                    st.success(f"视频文件成功上传到{S3_BUCKET}的{movies_with_srt_folder}文件夹!字幕文件成功上传到{S3_BUCKET}的{srt_folder}")
+                else:
+                    st.error("上传失败")
+
+            
+    st.write("## 视频不带字幕文件")
     # 文件上传
-    uploaded_file = st.file_uploader("选择带字幕的视频文件，或者字幕文件", type=['srt'])
+    uploaded_file = st.file_uploader("选择视频文件", type=['mp4', 'avi', 'mov', 'wmv'])
     if uploaded_file is not None:
         if st.button('上传到S3'):
             with st.spinner('正在上传...'):
-                folder = "input/"
-                s3_object_key = folder + uploaded_file.name
+                movies_without_srt_folder = "movies_without_srt/"
+                s3_object_key = movies_without_srt_folder + uploaded_file.name
                 if upload_to_s3(uploaded_file, S3_BUCKET, s3_object_key):
-                    st.success(f"文件成功上传到{S3_BUCKET}的{folder}文件夹!")
+                    st.success(f"文件成功上传到{S3_BUCKET}的{movies_without_srt_folder}文件夹!")
                 else:
                     st.error("上传失败")
+
         input_file_name = uploaded_file.name
         new_key_name = input_file_name.replace('.srt', '_translated.srt')
         folder_path = 'output/'
